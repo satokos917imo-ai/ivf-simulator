@@ -95,6 +95,20 @@ input[type=number]{width:90px;font-size:13px}
 .suc-val-ins{font-size:28px;font-weight:500;color:#085041}
 .suc-val-pgta{font-size:28px;font-weight:500;color:#185FA5}
 canvas{display:block;width:100%}
+@media(max-width:620px){
+  .grid2{grid-template-columns:1fr}
+  canvas{max-height:180px!important}
+  .compare-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .compare-table td,.compare-table th{font-size:11px;padding:5px 5px;white-space:nowrap}
+  .jsog-row{flex-wrap:wrap}
+  .jsog-cell{flex:1 1 40%}
+  label{min-width:150px;font-size:12px}
+  h2{font-size:15px}
+  h3{font-size:13px}
+  .suc-val-ins,.suc-val-pgta{font-size:22px}
+  .ref-table{font-size:10px}
+  .ref-table th:nth-child(n+4),.ref-table td:nth-child(n+4){display:none}
+}
 .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
 .ref-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
 .ref-table th{font-size:11px;font-weight:500;color:var(--color-text-secondary);padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);text-align:left}
@@ -168,10 +182,10 @@ canvas{display:block;width:100%}
 
 <div id="results" style="display:none;margin-top:1.5rem">
 
-  <!-- シミュレーター結果：治療継続前提 -->
+  <!-- ① 出産確率（数値のみ） -->
   <div class="card" style="margin-bottom:12px">
     <h3>治療を続けた場合の出産確率 <span style="font-size:11px;font-weight:400;color:var(--color-text-tertiary)">（45歳到達・移植上限まで継続を仮定）</span></h3>
-    <div class="grid2" style="margin:10px 0 14px">
+    <div class="grid2" style="margin:10px 0 10px">
       <div class="suc-block">
         <span class="suc-label">保険ルート（PGT-Aなし）</span>
         <span class="suc-val-ins" id="ins_suc_rate">—</span>
@@ -183,26 +197,42 @@ canvas{display:block;width:100%}
         <span style="font-size:12px;color:var(--color-text-tertiary)" id="pgta_suc_n"></span>
       </div>
     </div>
-
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap">
-      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">累積成功率：採卵回数別</span>
-      <span style="font-size:12px;color:var(--color-text-secondary)">
-        <span class="legend-dot" style="background:#1D9E75"></span>保険（PGT-Aなし）
-        <span class="legend-dot" style="background:#185FA5;margin-left:8px"></span>全額自費（PGT-Aあり）
-        <span style="margin-left:8px;font-size:11px;color:var(--color-text-tertiary)">帯＝90%CI（Wilson法）</span>
-      </span>
-    </div>
-    <canvas id="cumChart" style="height:200px"></canvas>
-    <div class="footnote">45歳到達または移植20回超過で打ち切り。治療中断は考慮しない「継続前提」のモデルです。全50,000試行が分母。</div>
-
-    <!-- 実績との乖離説明 -->
     <div class="concept-box">
       <p>このシミュレーターは「治療を続ければどうなるか」を示します。実際には費用・身体的負担・精神的疲弊により治療を中断する患者が一定数います。日本の実績値（下欄）と比較することで、自身の状況を判断してください。</p>
     </div>
   </div>
 
-  <!-- 実績パネル（JSOG/埼玉データ） -->
-  <div class="card" style="margin-bottom:12px">
+  <!-- ② 費用・期間比較タブ -->
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('median')">順調な場合（中央値）</button>
+    <button class="tab" onclick="switchTab('p90')">難航した場合（90%ile）</button>
+  </div>
+  <p style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:10px" id="tab_desc">
+    全50,000試行（治療継続前提）における中央値。数値下は25〜75パーセンタイル幅です。
+  </p>
+  <div id="tab_median">
+    <div class="grid2">
+      <div><div style="margin-bottom:8px"><span class="badge-ins">保険（PGT-Aなし）</span></div><div class="grid2" id="ins_med_cards"></div></div>
+      <div><div style="margin-bottom:8px"><span class="badge-pgta">全額自費（PGT-Aあり）</span></div><div class="grid2" id="pgta_med_cards"></div></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>詳細比較</h3>
+      <div class="compare-table-wrap"><table class="compare-table" id="med_table"></table></div>
+    </div>
+  </div>
+  <div id="tab_p90" style="display:none">
+    <div class="grid2">
+      <div><div style="margin-bottom:8px"><span class="badge-ins">保険（PGT-Aなし）</span></div><div class="grid2" id="ins_p90_cards"></div></div>
+      <div><div style="margin-bottom:8px"><span class="badge-pgta">全額自費（PGT-Aあり）</span></div><div class="grid2" id="pgta_p90_cards"></div></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>詳細比較</h3>
+      <div class="compare-table-wrap"><table class="compare-table" id="p90_table"></table></div>
+    </div>
+  </div>
+
+  <!-- ③ 日本実績パネル -->
+  <div class="card" style="margin-top:12px;margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
       <h3 style="margin-bottom:0">参考：日本の実績累積出産率（JSOG登録データ）</h3>
       <button class="collapse-toggle" id="jsog-toggle-btn" onclick="toggleSection('jsog-body','jsog-toggle-btn')">▼ 表示</button>
@@ -213,81 +243,41 @@ canvas{display:block;width:100%}
         <div class="jsog-title"><span>保険適用（2022年〜）の累積出産率目安</span><span class="jsog-badge">埼玉県補助金データ 2016年・n=1,072</span></div>
         <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:8px">※2016年は自費時代のデータ。2022年保険適用後は費用負担が下がり、継続率が向上している可能性があります。</div>
         <div class="jsog-row">
-          <div class="jsog-cell">
-            <div class="jsog-age">35歳未満</div>
-            <div class="jsog-clbr">58.4%</div>
-            <div class="jsog-limit">6回以内</div>
-          </div>
-          <div class="jsog-cell">
-            <div class="jsog-age">35〜39歳</div>
-            <div class="jsog-clbr">49.3%</div>
-            <div class="jsog-limit">6回以内</div>
-          </div>
-          <div class="jsog-cell">
-            <div class="jsog-age">40〜42歳</div>
-            <div class="jsog-clbr">17.2%</div>
-            <div class="jsog-limit">3回以内（保険上限）</div>
-          </div>
+          <div class="jsog-cell"><div class="jsog-age">35歳未満</div><div class="jsog-clbr">58.4%</div><div class="jsog-limit">6回以内</div></div>
+          <div class="jsog-cell"><div class="jsog-age">35〜39歳</div><div class="jsog-clbr">49.3%</div><div class="jsog-limit">6回以内</div></div>
+          <div class="jsog-cell"><div class="jsog-age">40〜42歳</div><div class="jsog-clbr">17.2%</div><div class="jsog-limit">3回以内（保険上限）</div></div>
         </div>
         <div class="jsog-note">
           出典：森ら「埼玉県ART補助金申請者の累積生産率」JSOG registry連携, Reprod Med Biol. 2021;20:495–501<br>
           ・中断・転院・自然妊娠等すべての転帰を含む実患者集団（n=1,072）<br>
-          ・JSOG ART registry 2022年報によれば、2022年の凍結融解ET全体の生産率は約27%（年齢別詳細は非公開）<br>
+          ・JSOG ART registry 2022年報：2022年の凍結融解ET全体の生産率は約27%（年齢別詳細は非公開）<br>
           ・<strong>上記シミュレーターの「継続前提」値との差分が、実質的な中断による損失</strong>を表します
         </div>
-
         <div class="divider"></div>
-
         <div class="jsog-title"><span>参考：米国データ（Malizia et al. 2009, NEJM, n=6,164）</span></div>
         <div class="jsog-row">
-          <div class="jsog-cell">
-            <div class="jsog-age">〜35歳</div>
-            <div class="jsog-clbr">65–86%</div>
-            <div class="jsog-limit">6回・楽観〜保守</div>
-          </div>
-          <div class="jsog-cell">
-            <div class="jsog-age">35〜37歳</div>
-            <div class="jsog-clbr">52–72%</div>
-            <div class="jsog-limit">6回・楽観〜保守</div>
-          </div>
-          <div class="jsog-cell">
-            <div class="jsog-age">38〜40歳</div>
-            <div class="jsog-clbr">33–52%</div>
-            <div class="jsog-limit">6回・楽観〜保守</div>
-          </div>
-          <div class="jsog-cell">
-            <div class="jsog-age">40歳以上</div>
-            <div class="jsog-clbr">23–42%</div>
-            <div class="jsog-limit">6回・楽観〜保守</div>
-          </div>
+          <div class="jsog-cell"><div class="jsog-age">〜35歳</div><div class="jsog-clbr">65–86%</div><div class="jsog-limit">6回・楽観〜保守</div></div>
+          <div class="jsog-cell"><div class="jsog-age">35〜37歳</div><div class="jsog-clbr">52–72%</div><div class="jsog-limit">6回・楽観〜保守</div></div>
+          <div class="jsog-cell"><div class="jsog-age">38〜40歳</div><div class="jsog-clbr">33–52%</div><div class="jsog-limit">6回・楽観〜保守</div></div>
+          <div class="jsog-cell"><div class="jsog-age">40歳以上</div><div class="jsog-clbr">23–42%</div><div class="jsog-limit">6回・楽観〜保守</div></div>
         </div>
         <div class="jsog-note">楽観推定＝中断患者も継続した場合と同率で成功と仮定。保守推定＝中断患者を全員失敗と仮定。<br>実態はその中間。本シミュレーターの「継続前提」値は楽観推定に近い性質を持ちます。</div>
       </div>
     </div>
   </div>
 
-  <!-- 費用・期間比較 -->
-  <div class="tab-row">
-    <button class="tab active" onclick="switchTab('median')">順調な場合（中央値）</button>
-    <button class="tab" onclick="switchTab('p90')">難航した場合（90%ile）</button>
-  </div>
-  <p style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:10px" id="tab_desc">
-    全50,000試行（治療継続前提、45歳・移植上限まで）における中央値です。数値下の小さいテキストは25〜75パーセンタイル幅です。
-  </p>
-
-  <div id="tab_median">
-    <div class="grid2">
-      <div><div style="margin-bottom:8px"><span class="badge-ins">保険（PGT-Aなし）</span></div><div class="grid2" id="ins_med_cards"></div></div>
-      <div><div style="margin-bottom:8px"><span class="badge-pgta">全額自費（PGT-Aあり）</span></div><div class="grid2" id="pgta_med_cards"></div></div>
+  <!-- ④ 累積成功率グラフ（文献の直前） -->
+  <div class="card" style="margin-bottom:12px">
+    <h3>累積成功率グラフ：採卵回数別</h3>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--color-text-secondary)">
+        <span class="legend-dot" style="background:#1D9E75"></span>保険（PGT-Aなし）
+        <span class="legend-dot" style="background:#185FA5;margin-left:8px"></span>全額自費（PGT-Aあり）
+        <span style="margin-left:6px;font-size:11px;color:var(--color-text-tertiary)">帯＝90%CI（Wilson法）</span>
+      </span>
     </div>
-    <div class="card" style="margin-top:12px"><h3>詳細比較</h3><table class="compare-table" id="med_table"></table></div>
-  </div>
-  <div id="tab_p90" style="display:none">
-    <div class="grid2">
-      <div><div style="margin-bottom:8px"><span class="badge-ins">保険（PGT-Aなし）</span></div><div class="grid2" id="ins_p90_cards"></div></div>
-      <div><div style="margin-bottom:8px"><span class="badge-pgta">全額自費（PGT-Aあり）</span></div><div class="grid2" id="pgta_p90_cards"></div></div>
-    </div>
-    <div class="card" style="margin-top:12px"><h3>詳細比較</h3><table class="compare-table" id="p90_table"></table></div>
+    <canvas id="cumChart"></canvas>
+    <div class="footnote" style="margin-top:6px">45歳到達または移植20回超過で打ち切り。治療中断は考慮しない「継続前提」のモデルです。全50,000試行が分母。</div>
   </div>
 
   <!-- 引用文献 -->
@@ -731,7 +721,7 @@ function drawCumChart(insD,pgtaD,N){
       {label:'全額自費（PGT-Aあり）',data:pgtaCum,borderColor:'#185FA5',backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:'#185FA5',borderWidth:2.5},
     ]},
     options:{
-      responsive:true, maintainAspectRatio:false,
+      responsive:true, maintainAspectRatio:true, aspectRatio:2,
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:false},
