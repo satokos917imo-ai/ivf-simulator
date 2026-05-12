@@ -1,0 +1,773 @@
+<!-- ===== パスワード保護 ===== -->
+<style>
+#pw-overlay{position:fixed;inset:0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;z-index:9999}
+#pw-box{background:white;border:0.5px solid #ddd;border-radius:12px;padding:2rem 2.5rem;width:320px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+#pw-box h2{font-size:17px;font-weight:500;margin-bottom:.5rem;color:#111}
+#pw-box p{font-size:13px;color:#888;margin-bottom:1.25rem}
+#pw-input{width:100%;padding:9px 12px;font-size:14px;border:0.5px solid #ccc;border-radius:8px;outline:none;text-align:center;letter-spacing:2px}
+#pw-input:focus{border-color:#1D9E75}
+#pw-btn{margin-top:10px;width:100%;background:#1D9E75;color:white;border:none;border-radius:8px;padding:9px;font-size:14px;font-weight:500;cursor:pointer}
+#pw-btn:hover{background:#178a64}
+#pw-err{font-size:12px;color:#c0392b;margin-top:8px;min-height:16px}
+</style>
+<div id="pw-overlay">
+  <div id="pw-box">
+    <h2>🔒 アクセス制限</h2>
+    <p>パスワードを入力してください</p>
+    <input type="password" id="pw-input" placeholder="パスワード" onkeydown="if(event.key==='Enter')checkPw()">
+    <button id="pw-btn" onclick="checkPw()">入力</button>
+    <div id="pw-err"></div>
+  </div>
+</div>
+<script>
+(function(){
+  // ★ここを変更してください★
+  const CORRECT = "pgta2026";
+
+  // セッション中は再入力不要
+  if(sessionStorage.getItem('auth')==='ok'){
+    document.addEventListener('DOMContentLoaded',()=>{
+      const o=document.getElementById('pw-overlay');
+      if(o) o.remove();
+    });
+  }
+
+  window.checkPw=function(){
+    const v=document.getElementById('pw-input').value;
+    if(v===CORRECT){
+      sessionStorage.setItem('auth','ok');
+      document.getElementById('pw-overlay').remove();
+    } else {
+      document.getElementById('pw-err').textContent='パスワードが違います';
+      document.getElementById('pw-input').value='';
+      document.getElementById('pw-input').focus();
+    }
+  };
+})();
+</script>
+<!-- ===== /パスワード保護 ===== -->
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+h2{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:.75rem}
+h3{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:.75rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.metric-ci{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+label{font-size:13px;color:var(--color-text-secondary);min-width:190px;flex-shrink:0}
+input[type=number]{width:90px;font-size:13px}
+.val-display{font-size:13px;font-weight:500;min-width:40px;text-align:right}
+.toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.toggle{width:36px;height:20px;background:var(--color-border-secondary);border-radius:10px;position:relative;cursor:pointer;border:none;transition:background .2s}
+.toggle.on{background:#1D9E75}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.toggle.on::after{left:18px}
+.tab-row{display:flex;gap:6px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1rem}
+.tab{font-size:13px;padding:6px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px}
+.tab.active{color:var(--color-text-primary);border-bottom:2px solid #1D9E75;font-weight:500}
+.run-btn{background:#1D9E75;color:white;border:none;border-radius:var(--border-radius-md);padding:10px 28px;font-size:14px;font-weight:500;cursor:pointer;width:100%;margin-top:1rem}
+.run-btn:disabled{opacity:.5;cursor:not-allowed}
+.badge-ins{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;background:#E1F5EE;color:#085041}
+.badge-pgta{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;background:#E6F1FB;color:#0C447C}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px}
+.compare-table th{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.compare-table td{padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.compare-table tr:last-child td{border-bottom:none}
+.td-ins{color:#085041;font-weight:500}
+.td-pgta{color:#0C447C;font-weight:500}
+.status{font-size:13px;color:var(--color-text-secondary);margin-top:.5rem;min-height:18px}
+.collapse-toggle{font-size:12px;color:var(--color-text-secondary);cursor:pointer;border:none;background:transparent;text-decoration:underline}
+.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.collapsible{overflow:hidden;max-height:0;transition:max-height .3s}
+.collapsible.open{max-height:4000px}
+.note{font-size:11px;color:var(--color-text-tertiary);margin-top:4px}
+.progress-bar{height:4px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden;margin:.75rem 0}
+.progress-fill{height:100%;background:#1D9E75;width:0%}
+.fix-tag{display:inline-block;font-size:10px;background:#FAEEDA;color:#633806;border-radius:3px;padding:1px 5px;vertical-align:middle;margin-left:4px}
+.footnote{font-size:11px;color:var(--color-text-tertiary);margin-top:10px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
+.suc-block{display:flex;flex-direction:column;gap:3px}
+.suc-label{font-size:12px;color:var(--color-text-secondary)}
+.suc-val-ins{font-size:28px;font-weight:500;color:#085041}
+.suc-val-pgta{font-size:28px;font-weight:500;color:#185FA5}
+canvas{display:block;width:100%}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.ref-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+.ref-table th{font-size:11px;font-weight:500;color:var(--color-text-secondary);padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);text-align:left}
+.ref-table td{padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);vertical-align:top}
+.ref-table tr:last-child td{border-bottom:none}
+/* 実績パネル */
+.jsog-panel{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.875rem 1rem;margin-top:12px}
+.jsog-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.jsog-badge{font-size:10px;background:#E1F5EE;color:#085041;border-radius:3px;padding:1px 5px}
+.jsog-row{display:flex;gap:0;border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:6px;border:0.5px solid var(--color-border-tertiary)}
+.jsog-cell{flex:1;padding:8px 10px;background:var(--color-background-primary)}
+.jsog-cell+.jsog-cell{border-left:0.5px solid var(--color-border-tertiary)}
+.jsog-age{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+.jsog-clbr{font-size:17px;font-weight:500;color:var(--color-text-primary)}
+.jsog-limit{font-size:10px;color:var(--color-text-tertiary);margin-top:1px}
+.jsog-note{font-size:11px;color:var(--color-text-tertiary);margin-top:6px;line-height:1.6}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:14px 0}
+.concept-box{border-left:2px solid #1D9E75;padding:8px 12px;background:var(--color-background-secondary);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;margin-top:8px}
+.concept-box p{font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin:0}
+</style>
+
+<h2 style="margin-top:1rem">不妊治療 費用・期間シミュレーター <span style="font-size:12px;font-weight:400;color:var(--color-text-tertiary)">v7</span></h2>
+<p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem">保険適用（PGT-Aなし）と全額自費（PGT-Aあり）を比較します</p>
+
+<div class="card" style="margin-bottom:12px">
+  <h3>患者パラメータ</h3>
+  <div class="row"><label>現在の年齢</label><input type="number" id="current_age" value="38" min="25" max="45"><span class="val-display" id="d_ca">38歳</span></div>
+  <div class="row"><label>保険治療を開始した年齢</label><input type="number" id="start_age" value="37" min="25" max="45"><span class="val-display" id="d_sa">37歳</span></div>
+  <div class="row"><label>AMH値 (ng/mL)</label><input type="number" id="amh" value="1.2" step="0.1" min="0.1" max="10"><span class="val-display" id="d_amh">1.2</span></div>
+  <div class="row"><label>過去の保険移植 失敗回数</label><input type="number" id="past_ins" value="2" min="0" max="10"><span class="val-display" id="d_pi">2回</span></div>
+  <div class="row"><label>過去のPGT-A移植 失敗回数</label><input type="number" id="past_pgta" value="0" min="0" max="10"><span class="val-display" id="d_pp">0回</span></div>
+  <div class="toggle-row">
+    <label style="min-width:190px;font-size:13px;color:var(--color-text-secondary)">PCOS（多嚢胞性卵巣症候群）</label>
+    <button class="toggle" id="pcos_toggle" onclick="togglePcos()"></button>
+    <span id="pcos_label" style="font-size:13px;color:var(--color-text-secondary)">なし</span>
+  </div>
+  <div class="row">
+    <label>年収区分（高額療養費）</label>
+    <select id="income_tier" style="font-size:13px;padding:4px 6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)">
+      <option value="0">適用しない</option>
+      <option value="57600">〜約370万円（上限 57,600円/月）</option>
+      <option value="80100" selected>約370〜770万円（上限 80,100円/月）</option>
+      <option value="167400">約770〜1,160万円（上限 167,400円/月）</option>
+      <option value="252600">約1,160万円〜（上限 252,600円/月）</option>
+    </select>
+  </div>
+  <div class="note" style="margin-top:-4px;padding-left:200px">保険適用費用のみ上限を適用。自費・PGT-A費用は対象外。</div>
+</div>
+
+<div class="card" style="margin-bottom:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+    <h3 style="margin-bottom:0">費用設定</h3>
+    <button class="collapse-toggle" id="cost-toggle-btn" onclick="toggleSection('cost-panel','cost-toggle-btn')">▼ 詳細を表示</button>
+  </div>
+  <div class="collapsible" id="cost-panel">
+    <div class="cost-grid">
+      <div><div class="note" style="margin-bottom:3px">採卵費用（保険）</div><input type="number" id="c_egg_ins" value="100000" step="10000"></div>
+      <div><div class="note" style="margin-bottom:3px">採卵費用（自費）</div><input type="number" id="c_egg_self" value="430000" step="10000"></div>
+      <div><div class="note" style="margin-bottom:3px">移植費用（保険）</div><input type="number" id="c_et_ins" value="30000" step="5000"></div>
+      <div><div class="note" style="margin-bottom:3px">移植費用（自費）</div><input type="number" id="c_et_self" value="120000" step="10000"></div>
+      <div><div class="note" style="margin-bottom:3px">PGT-A検査（胚1個）</div><input type="number" id="c_pgta" value="60000" step="5000"></div>
+      <div><div class="note" style="margin-bottom:3px">流産処置費用</div><input type="number" id="c_misc" value="30000" step="5000"></div>
+    </div>
+    <div class="note" style="margin-top:8px">保険上限超過後は自費単価に自動切替。PGT-A費用は胚盤胞数×単価で加算。</div>
+  </div>
+</div>
+
+<button class="run-btn" id="run_btn" onclick="runSim()">シミュレーション実行（5万回）</button>
+<div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+<div class="status" id="status">パラメータを確認してシミュレーションを実行してください</div>
+
+<div id="results" style="display:none;margin-top:1.5rem">
+
+  <!-- シミュレーター結果：治療継続前提 -->
+  <div class="card" style="margin-bottom:12px">
+    <h3>治療を続けた場合の出産確率 <span style="font-size:11px;font-weight:400;color:var(--color-text-tertiary)">（45歳到達・移植上限まで継続を仮定）</span></h3>
+    <div class="grid2" style="margin:10px 0 14px">
+      <div class="suc-block">
+        <span class="suc-label">保険ルート（PGT-Aなし）</span>
+        <span class="suc-val-ins" id="ins_suc_rate">—</span>
+        <span style="font-size:12px;color:var(--color-text-tertiary)" id="ins_suc_n"></span>
+      </div>
+      <div class="suc-block">
+        <span class="suc-label">全額自費ルート（PGT-Aあり）</span>
+        <span class="suc-val-pgta" id="pgta_suc_rate">—</span>
+        <span style="font-size:12px;color:var(--color-text-tertiary)" id="pgta_suc_n"></span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">累積成功率：採卵回数別</span>
+      <span style="font-size:12px;color:var(--color-text-secondary)">
+        <span class="legend-dot" style="background:#1D9E75"></span>保険（PGT-Aなし）
+        <span class="legend-dot" style="background:#185FA5;margin-left:8px"></span>全額自費（PGT-Aあり）
+        <span style="margin-left:8px;font-size:11px;color:var(--color-text-tertiary)">帯＝90%CI（Wilson法）</span>
+      </span>
+    </div>
+    <canvas id="cumChart" style="height:200px"></canvas>
+    <div class="footnote">45歳到達または移植20回超過で打ち切り。治療中断は考慮しない「継続前提」のモデルです。全50,000試行が分母。</div>
+
+    <!-- 実績との乖離説明 -->
+    <div class="concept-box">
+      <p>このシミュレーターは「治療を続ければどうなるか」を示します。実際には費用・身体的負担・精神的疲弊により治療を中断する患者が一定数います。日本の実績値（下欄）と比較することで、自身の状況を判断してください。</p>
+    </div>
+  </div>
+
+  <!-- 実績パネル（JSOG/埼玉データ） -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
+      <h3 style="margin-bottom:0">参考：日本の実績累積出産率（JSOG登録データ）</h3>
+      <button class="collapse-toggle" id="jsog-toggle-btn" onclick="toggleSection('jsog-body','jsog-toggle-btn')">▼ 表示</button>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:0">中断・断念を含む実際の患者集団での出産割合です</p>
+    <div class="collapsible" id="jsog-body">
+      <div style="margin-top:10px">
+        <div class="jsog-title"><span>保険適用（2022年〜）の累積出産率目安</span><span class="jsog-badge">埼玉県補助金データ 2016年・n=1,072</span></div>
+        <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:8px">※2016年は自費時代のデータ。2022年保険適用後は費用負担が下がり、継続率が向上している可能性があります。</div>
+        <div class="jsog-row">
+          <div class="jsog-cell">
+            <div class="jsog-age">35歳未満</div>
+            <div class="jsog-clbr">58.4%</div>
+            <div class="jsog-limit">6回以内</div>
+          </div>
+          <div class="jsog-cell">
+            <div class="jsog-age">35〜39歳</div>
+            <div class="jsog-clbr">49.3%</div>
+            <div class="jsog-limit">6回以内</div>
+          </div>
+          <div class="jsog-cell">
+            <div class="jsog-age">40〜42歳</div>
+            <div class="jsog-clbr">17.2%</div>
+            <div class="jsog-limit">3回以内（保険上限）</div>
+          </div>
+        </div>
+        <div class="jsog-note">
+          出典：森ら「埼玉県ART補助金申請者の累積生産率」JSOG registry連携, Reprod Med Biol. 2021;20:495–501<br>
+          ・中断・転院・自然妊娠等すべての転帰を含む実患者集団（n=1,072）<br>
+          ・JSOG ART registry 2022年報によれば、2022年の凍結融解ET全体の生産率は約27%（年齢別詳細は非公開）<br>
+          ・<strong>上記シミュレーターの「継続前提」値との差分が、実質的な中断による損失</strong>を表します
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="jsog-title"><span>参考：米国データ（Malizia et al. 2009, NEJM, n=6,164）</span></div>
+        <div class="jsog-row">
+          <div class="jsog-cell">
+            <div class="jsog-age">〜35歳</div>
+            <div class="jsog-clbr">65–86%</div>
+            <div class="jsog-limit">6回・楽観〜保守</div>
+          </div>
+          <div class="jsog-cell">
+            <div class="jsog-age">35〜37歳</div>
+            <div class="jsog-clbr">52–72%</div>
+            <div class="jsog-limit">6回・楽観〜保守</div>
+          </div>
+          <div class="jsog-cell">
+            <div class="jsog-age">38〜40歳</div>
+            <div class="jsog-clbr">33–52%</div>
+            <div class="jsog-limit">6回・楽観〜保守</div>
+          </div>
+          <div class="jsog-cell">
+            <div class="jsog-age">40歳以上</div>
+            <div class="jsog-clbr">23–42%</div>
+            <div class="jsog-limit">6回・楽観〜保守</div>
+          </div>
+        </div>
+        <div class="jsog-note">楽観推定＝中断患者も継続した場合と同率で成功と仮定。保守推定＝中断患者を全員失敗と仮定。<br>実態はその中間。本シミュレーターの「継続前提」値は楽観推定に近い性質を持ちます。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 費用・期間比較 -->
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('median')">順調な場合（中央値）</button>
+    <button class="tab" onclick="switchTab('p90')">難航した場合（90%ile）</button>
+  </div>
+  <p style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:10px" id="tab_desc">
+    全50,000試行（治療継続前提、45歳・移植上限まで）における中央値です。数値下の小さいテキストは25〜75パーセンタイル幅です。
+  </p>
+
+  <div id="tab_median">
+    <div class="grid2">
+      <div><div style="margin-bottom:8px"><span class="badge-ins">保険（PGT-Aなし）</span></div><div class="grid2" id="ins_med_cards"></div></div>
+      <div><div style="margin-bottom:8px"><span class="badge-pgta">全額自費（PGT-Aあり）</span></div><div class="grid2" id="pgta_med_cards"></div></div>
+    </div>
+    <div class="card" style="margin-top:12px"><h3>詳細比較</h3><table class="compare-table" id="med_table"></table></div>
+  </div>
+  <div id="tab_p90" style="display:none">
+    <div class="grid2">
+      <div><div style="margin-bottom:8px"><span class="badge-ins">保険（PGT-Aなし）</span></div><div class="grid2" id="ins_p90_cards"></div></div>
+      <div><div style="margin-bottom:8px"><span class="badge-pgta">全額自費（PGT-Aあり）</span></div><div class="grid2" id="pgta_p90_cards"></div></div>
+    </div>
+    <div class="card" style="margin-top:12px"><h3>詳細比較</h3><table class="compare-table" id="p90_table"></table></div>
+  </div>
+
+  <!-- 引用文献 -->
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <h3 style="margin-bottom:0">引用文献・モデル概要</h3>
+      <button class="collapse-toggle" id="refs-toggle-btn" onclick="toggleSection('refs-panel','refs-toggle-btn')">▼ 表示</button>
+    </div>
+    <div class="collapsible" id="refs-panel">
+      <table class="ref-table">
+        <tr><th>用途</th><th>文献</th><th>採用値</th><th>対象集団</th><th>日本人への適用上の注意</th></tr>
+        <tr>
+          <td>採卵数予測</td>
+          <td>Moon et al. 2016<br><em>J Assist Reprod Genet</em></td>
+          <td>log(Oocytes)=3.21−0.036×Age+0.089×AMH</td>
+          <td>韓国人女性、単施設</td>
+          <td>韓国人と日本人は体格・卵巣反応が比較的近似。ただし刺激プロトコルの違いにより採卵数に±20%程度の施設差が生じる可能性。</td>
+        </tr>
+        <tr>
+          <td>正常胚率（euploid rate）<br>未検査胚LBR・流産率</td>
+          <td>仕様書指定の基準データ<br>（複数文献の統合推計値）<br>25〜45歳・年齢別テーブル</td>
+          <td>主に欧米の大規模PGT-Aコホート</td>
+          <td>日本人の正常胚率は欧米と大差ないとされるが、施設・検査方法（NGS vs aCGH）により数値が異なる。流産率は日本人でやや高い可能性（加齢卵子の染色体異常率が高いとする報告あり）。</td>
+        </tr>
+        <tr>
+          <td>受精率（年齢非依存）</td>
+          <td>Dahan et al. 2020<br><em>Reprod Biomed Online</em><br>ICSI 8,308サイクル（2012–2019）</td>
+          <td>米国、ICSI施行例</td>
+          <td>日本のICSI率は約70%と高く適用可。ただし従来型IVFでは受精率が低下する場合あり。</td>
+        </tr>
+        <tr>
+          <td>胚盤胞到達率（年齢別）</td>
+          <td>Kort et al. 2022<br><em>RBMO</em>, n=3,362<br>+ Doyle et al. 2021<br><em>Fertil Steril</em></td>
+          <td>米国、凍結全胚サイクル</td>
+          <td>日本はfreeze-all率が世界最高水準（約58%、JSOG 2022）で比較的適用可。ただし培養液・インキュベーター環境の施設差により胚盤胞到達率に±10pp程度のばらつきがある。</td>
+        </tr>
+        <tr>
+          <td>LBR減衰（PGT-Aあり）</td>
+          <td>Pirtea et al. 2020<br><em>Fertil Steril</em></td>
+          <td>ベルギー単施設</td>
+          <td>施設のプロトコル・凍結技術が異なる。日本は凍結融解ET比率が極めて高く（ET全体の85%超）、凍結成績が特に良好な施設では減衰が小さい可能性。</td>
+        </tr>
+        <tr>
+          <td>LBR減衰（保険ルート）</td>
+          <td>HFEA基準の段階的減衰<br>（英国HFEAデータ準拠）</td>
+          <td>英国、全国データ</td>
+          <td>英国の移植成功率は日本と概ね近似。ただし英国は新鮮胚移植比率が高く、凍結融解中心の日本とは母集団が異なる。</td>
+        </tr>
+        <tr>
+          <td>VirtualFails推計（v6〜）<span class="fix-tag">案B</span></td>
+          <td>設計上の改善（追加文献不要）</td>
+          <td>—</td>
+          <td>均等間隔仮定は実際の移植スケジュールと異なる場合あり。移植が密集していた場合は誤差が生じる。</td>
+        </tr>
+        <tr>
+          <td>胚年齢帰属（v3〜）</td>
+          <td>生物学的根拠</td>
+          <td>—</td>
+          <td>PGT-A胚=採卵時年齢、未検査胚=移植時年齢。子宮内膜受容能の加齢影響は未検査胚LBRに反映済み（移植時年齢の値を使用）。</td>
+        </tr>
+        <tr>
+          <td>臨床妊娠率（v2〜）</td>
+          <td>定義式: LBR = clinPreg × (1−流産率)</td>
+          <td>—</td>
+          <td>化学的流産（hCGのみ陽性）は流産率に含まれない可能性あり。実臨床での臨床妊娠率はやや高くなる場合がある。</td>
+        </tr>
+        <tr>
+          <td>高額療養費（v7〜）</td>
+          <td>厚生労働省 高額療養費制度<br>2024年度現行区分</td>
+          <td>日本・保険適用者</td>
+          <td>多数該当（連続3ヶ月超）による減額、世帯合算は未実装。実際の自己負担は本計算より低くなる場合あり。</td>
+        </tr>
+        <tr>
+          <td>日本実績CLBR</td>
+          <td>森ら 2021, <em>Reprod Med Biol</em><br>埼玉県JSOG連携 n=1,072（2016年）</td>
+          <td>日本・埼玉県・自費時代</td>
+          <td>2022年保険適用前のデータ。保険適用後は費用負担減少により継続率・累積出産率が向上している可能性が高い。</td>
+        </tr>
+        <tr>
+          <td>米国実績CLBR</td>
+          <td>Malizia et al. 2009, <em>NEJM</em><br>n=6,164（2000–2005年）</td>
+          <td>米国・単施設・20年前</td>
+          <td>20年前のデータ。現在は凍結技術・培養液の大幅改善により全年齢層で成功率が向上している。現在の実績値は1.2〜1.5倍程度高い可能性がある。</td>
+        </tr>
+      </table>
+      <div class="footnote">信頼区間（帯グラフ）はWilson score法による90%CI。5万試行のため統計的ばらつきは小さく、帯の幅はモデル自体の不確実性ではなくサンプリング誤差を表します。本シミュレーターは意思決定支援ツールであり、実際の治療方針は必ず担当医とご相談ください。</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+let pcosOn=false, currentTab='median', chartInst=null;
+
+function togglePcos(){
+  pcosOn=!pcosOn;
+  document.getElementById('pcos_toggle').className='toggle'+(pcosOn?' on':'');
+  document.getElementById('pcos_label').textContent=pcosOn?'あり':'なし';
+}
+function toggleSection(panelId, btnId){
+  const p=document.getElementById(panelId);
+  const b=document.getElementById(btnId);
+  const open=p.classList.toggle('open');
+  b.textContent=open?'▲ 閉じる':'▼ 表示';
+}
+function toggleCosts(){ toggleSection('cost-panel','cost-toggle-btn'); }
+
+[['current_age','d_ca','歳'],['start_age','d_sa','歳'],['amh','d_amh',''],
+ ['past_ins','d_pi','回'],['past_pgta','d_pp','回']].forEach(([id,did,u])=>{
+  document.getElementById(id).addEventListener('input',()=>{
+    document.getElementById(did).textContent=document.getElementById(id).value+u;
+  });
+});
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='median'?0:1)));
+  document.getElementById('tab_median').style.display=tab==='median'?'block':'none';
+  document.getElementById('tab_p90').style.display=tab==='p90'?'block':'none';
+  document.getElementById('tab_desc').textContent=tab==='median'
+    ?'全50,000試行（治療継続前提、45歳・移植上限まで）における中央値です。'
+    :'全50,000試行における90パーセンタイル（難航した場合の上限目安）です。';
+}
+
+/* ── コアモデル関数 ── */
+function lerp(a,b,t){return a+(b-a)*t}
+
+function getAgeData(age){
+  const a=Math.min(45,Math.max(25,age));
+  const pts={
+    euploid_rate:[[25,.70],[35,.55],[40,.28],[45,.05]],
+    lbr_no_pgta: [[25,.50],[35,.40],[40,.20],[45,.02]],
+    lbr_pgta:    [[25,.68],[35,.63],[40,.55],[45,.40]],
+    misc_no_pgta:[[25,.12],[40,.40]],
+    misc_pgta:   [[25,.06],[40,.10]]
+  };
+  const interp=(arr,x)=>{
+    if(x<=arr[0][0]) return arr[0][1];
+    if(x>=arr[arr.length-1][0]) return arr[arr.length-1][1];
+    for(let i=0;i<arr.length-1;i++){
+      if(x>=arr[i][0]&&x<=arr[i+1][0])
+        return lerp(arr[i][1],arr[i+1][1],(x-arr[i][0])/(arr[i+1][0]-arr[i][0]));
+    }
+  };
+  const r={};
+  for(const k in pts) r[k]=interp(pts[k],a);
+  return r;
+}
+
+// 胚盤胞到達率 (Kort 2022 + Doyle 2021)：≤40歳まで66.7%、41歳以降段階低下
+function blastRate(age){
+  const base=0.667;
+  if(age<=40) return base;
+  if(age<41) return lerp(base,base-0.052,age-40);
+  if(age<42) return lerp(base-0.052,base-0.096,age-41);
+  if(age<43) return lerp(base-0.096,base-0.173,age-42);
+  if(age<44) return lerp(base-0.173,base-0.208,age-43);
+  return base-0.208;
+}
+
+// 受精率 (Dahan 2020)：年齢非依存、84.4% ±ばらつき
+function fertRate(){ return Math.min(0.99,Math.max(0.50, 0.844+(Math.random()-0.5)*0.10)); }
+
+function predictOocytes(age,amh,pcos){
+  const raw=Math.exp(3.21-0.036*age+0.089*amh);
+  return pcos?raw*1.5:raw;
+}
+function getInsLimit(sa){ return sa<40?6:sa<=42?3:0; }
+function lbrDecayIns(b,F){ return b*(F===0?1:F===1?.95:F===2?.90:F===3?.80:.70); }
+function lbrDecayPgta(b,F){ return b*(F===0?1:F===1?.84:.83); }
+function randn(){
+  let u=0,v=0;
+  while(!u)u=Math.random(); while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+/* ── 案B: 移植時推定年齢を均等分割してVirtualFailsを積算 ──
+   各移植をstart_age〜current_ageの区間に均等配置し、
+   その時点の正常胚率を積算してfloor()する。
+   現在年齢の正常胚率を一律適用する旧式より、
+   治療期間が長い患者・高齢患者での過小推計を解消する。 */
+function calcVirtualFails(pastIns, startAge, currentAge){
+  if(pastIns===0) return 0;
+  let total=0;
+  for(let i=0;i<pastIns;i++){
+    // i番目移植の区間中点年齢（均等間隔仮定）
+    const t=(i+0.5)/pastIns;
+    const age=startAge+t*(currentAge-startAge);
+    total+=getAgeData(age).euploid_rate;
+  }
+  return Math.floor(total);
+}
+
+/* ── シミュレーション本体（脱落なし・治療継続前提） ── */
+function simOneTrial(params, route){
+  const {currentAge,startAge,amh,pastIns,pastPgta,pcos,
+         incomeCap,cEggIns,cEggSelf,cEtIns,cEtSelf,cPgta,cMisc}=params;
+  const insLimit=getInsLimit(startAge);
+  const virtualFails=calcVirtualFails(pastIns,startAge,currentAge);
+
+  let months=0, cost=0, retrievals=0, transfers=0, miscarriages=0, insUsed=0;
+  let F_ins=pastIns+pastPgta, F_pgta=virtualFails+pastPgta;
+  let frozBank=[];
+  const MAX_ET=20;
+
+  // 高額療養費：月ごとの保険適用費用を追跡してキャップ適用
+  // monthlyInsSpend[m] = m月目の保険適用費用累計
+  const monthlyIns={};
+  function addInsCost(m, amt){
+    // 高額療養費上限を超えた分は還付（実質上限額のみ負担）
+    if(incomeCap===0 || amt<=0){ cost+=amt; return; }
+    const prev=monthlyIns[m]||0;
+    const afterCap=Math.max(0, Math.min(amt, incomeCap-prev));
+    cost+=afterCap;
+    monthlyIns[m]=(prev+amt);
+  }
+
+  while(transfers<MAX_ET){
+    const ageNow=Math.min(45, currentAge+months/12);
+    if(ageNow>=45) break;
+
+    if(frozBank.length===0){
+      retrievals++;
+      months+=2;
+      const ageRet=Math.min(45, currentAge+months/12);
+      if(ageRet>=45) break;
+      const adRet=getAgeData(ageRet);
+
+      const meanOoc=predictOocytes(ageRet,amh,pcos);
+      const oocytes=Math.max(1, Math.round(meanOoc+randn()*Math.sqrt(meanOoc)));
+      const fertilized=Math.round(oocytes*fertRate());
+      const bRate=blastRate(ageRet);
+      const blasts=Math.max(0, Math.round(fertilized*(bRate+randn()*0.07)));
+
+      if(route==='pgta'){
+        // 自費採卵＋PGT-A費用：高額療養費対象外
+        cost+=cEggSelf+blasts*cPgta;
+        let euploids=0;
+        for(let b=0;b<blasts;b++) if(Math.random()<adRet.euploid_rate) euploids++;
+        for(let e=0;e<euploids;e++) frozBank.push({retrievalAge:ageRet});
+        if(euploids===0) continue;
+      } else {
+        const insOk=(insUsed<insLimit);
+        if(insOk){
+          addInsCost(months, cEggIns); // 保険採卵→高額療養費適用
+          insUsed++;
+        } else {
+          cost+=cEggSelf; // 上限超→自費
+        }
+        for(let b=0;b<blasts;b++) frozBank.push({retrievalAge:ageRet});
+        if(blasts===0) continue;
+      }
+    }
+
+    const embryo=frozBank.shift();
+    transfers++;
+    months+=1;
+    const ageET=Math.min(45, currentAge+months/12);
+    if(ageET>=45) break;
+
+    const insInsET=(route==='ins')&&(insUsed<insLimit);
+    if(insInsET){
+      addInsCost(months, cEtIns); // 保険移植→高額療養費適用
+      insUsed++;
+    } else {
+      cost+=cEtSelf;
+    }
+
+    let baseLbr, baseMisc;
+    if(route==='pgta'){
+      const adEmb=getAgeData(embryo.retrievalAge);
+      baseLbr=lbrDecayPgta(adEmb.lbr_pgta, F_pgta);
+      baseMisc=adEmb.misc_pgta;
+      F_pgta++;
+    } else {
+      const adET=getAgeData(ageET);
+      baseLbr=lbrDecayIns(adET.lbr_no_pgta, F_ins);
+      baseMisc=adET.misc_no_pgta;
+      F_ins++;
+    }
+
+    const clinPreg=Math.min(0.99, baseLbr/(1-baseMisc+1e-9));
+    const r=Math.random();
+    if(r<baseLbr){
+      return {months,cost,retrievals,transfers,miscarriages,success:true};
+    } else if(r<clinPreg){
+      miscarriages++;
+      months+=3;
+      cost+=cMisc; // 流産処置は自費扱い
+    }
+  }
+  return {months,cost,retrievals,transfers,miscarriages,success:false};
+}
+
+function percentile(arr,p){
+  if(!arr.length) return 0;
+  const s=[...arr].sort((a,b)=>a-b);
+  return s[Math.min(Math.floor(s.length*p/100),s.length-1)];
+}
+
+async function runSim(){
+  const btn=document.getElementById('run_btn');
+  btn.disabled=true;
+  document.getElementById('status').textContent='シミュレーション実行中...';
+  document.getElementById('results').style.display='none';
+  const prog=document.getElementById('prog');
+  prog.style.width='0%';
+  await new Promise(r=>setTimeout(r,10));
+
+  const params={
+    currentAge:+document.getElementById('current_age').value,
+    startAge:  +document.getElementById('start_age').value,
+    amh:       +document.getElementById('amh').value,
+    pastIns:   +document.getElementById('past_ins').value,
+    pastPgta:  +document.getElementById('past_pgta').value,
+    pcos:pcosOn,
+    incomeCap: +document.getElementById('income_tier').value,
+    cEggIns:  +document.getElementById('c_egg_ins').value,
+    cEggSelf: +document.getElementById('c_egg_self').value,
+    cEtIns:   +document.getElementById('c_et_ins').value,
+    cEtSelf:  +document.getElementById('c_et_self').value,
+    cPgta:    +document.getElementById('c_pgta').value,
+    cMisc:    +document.getElementById('c_misc').value,
+  };
+
+  const N=50000, CHUNK=5000, MAX_RET=10;
+  const mk=()=>({
+    months:[],cost:[],retrievals:[],transfers:[],miscarriages:[],
+    successes:0,total:0,
+    // 採卵回数ごとの成功試行コスト・月数を記録（信頼区間グラフ用）
+    cumSucc:new Array(MAX_RET+1).fill(0),
+    // 全試行の採卵回数ごと累積成功数リスト（ブートストラップ不要、直接集計）
+    cumSuccTrials:[] // 各試行の「成功した採卵回数」を記録
+  });
+  let insD=mk(), pgtaD=mk();
+
+  for(let done=0;done<N;done+=CHUNK){
+    const chunk=Math.min(CHUNK,N-done);
+    for(let i=0;i<chunk;i++){
+      const ir=simOneTrial(params,'ins');
+      const pr=simOneTrial(params,'pgta');
+      for(const [d,res] of [[insD,ir],[pgtaD,pr]]){
+        d.months.push(res.months);
+        d.cost.push(res.cost);
+        d.retrievals.push(res.retrievals);
+        d.transfers.push(res.transfers);
+        d.miscarriages.push(res.miscarriages);
+        d.total++;
+        if(res.success){
+          d.successes++;
+          d.cumSucc[Math.min(res.retrievals,MAX_RET)]++;
+        }
+      }
+    }
+    prog.style.width=Math.round((done+chunk)/N*100)+'%';
+    await new Promise(r=>setTimeout(r,0));
+  }
+
+  renderResults(insD,pgtaD,N);
+  btn.disabled=false;
+  const ip=(insD.successes/N*100).toFixed(1), pp=(pgtaD.successes/N*100).toFixed(1);
+  document.getElementById('status').textContent=
+    `完了（継続前提）: 保険 ${ip}% / PGT-A ${pp}% が出産に至りました（全${N.toLocaleString()}試行）`;
+}
+
+function fmtM(n){return Math.round(n)+'ヶ月'}
+function fmtC(n){return '¥'+Math.round(n/10000)+'万'}
+function fmtN(n){return (Math.round(n*10)/10)+'回'}
+
+function makeCards(elId,data,pct){
+  const p25=pct===50?25:75, p75=pct===50?75:95;
+  document.getElementById(elId).innerHTML=`
+    <div class="metric"><div class="metric-label">治療期間</div><div class="metric-val">${fmtM(percentile(data.months,pct))}</div><div class="metric-ci">${fmtM(percentile(data.months,p25))}〜${fmtM(percentile(data.months,p75))}</div></div>
+    <div class="metric"><div class="metric-label">トータル費用</div><div class="metric-val">${fmtC(percentile(data.cost,pct))}</div><div class="metric-ci">${fmtC(percentile(data.cost,p25))}〜${fmtC(percentile(data.cost,p75))}</div></div>
+    <div class="metric"><div class="metric-label">採卵回数</div><div class="metric-val">${fmtN(percentile(data.retrievals,pct))}</div><div class="metric-ci">${fmtN(percentile(data.retrievals,p25))}〜${fmtN(percentile(data.retrievals,p75))}</div></div>
+    <div class="metric"><div class="metric-label">移植回数</div><div class="metric-val">${fmtN(percentile(data.transfers,pct))}</div><div class="metric-ci">${fmtN(percentile(data.transfers,p25))}〜${fmtN(percentile(data.transfers,p75))}</div></div>`;
+}
+
+function makeTable(elId,insD,pgtaD,pct){
+  const rows=[
+    ['治療期間',    fmtM(percentile(insD.months,pct)),      fmtM(percentile(pgtaD.months,pct))],
+    ['トータル費用', fmtC(percentile(insD.cost,pct)),        fmtC(percentile(pgtaD.cost,pct))],
+    ['採卵回数',    fmtN(percentile(insD.retrievals,pct)),   fmtN(percentile(pgtaD.retrievals,pct))],
+    ['移植回数',    fmtN(percentile(insD.transfers,pct)),    fmtN(percentile(pgtaD.transfers,pct))],
+    ['流産回数',    fmtN(percentile(insD.miscarriages,pct)), fmtN(percentile(pgtaD.miscarriages,pct))],
+  ];
+  document.getElementById(elId).innerHTML=
+    `<tr><th>項目</th><th class="td-ins">保険（PGT-Aなし）</th><th class="td-pgta">全額自費（PGT-Aあり）</th></tr>`+
+    rows.map(r=>`<tr><td>${r[0]}</td><td class="td-ins">${r[1]}</td><td class="td-pgta">${r[2]}</td></tr>`).join('');
+}
+
+function drawCumChart(insD,pgtaD,N){
+  const MAX_RET=10;
+  const labels=[];
+  const insCum=[],pgtaCum=[];
+  const insLo=[],insHi=[],pgtaLo=[],pgtaHi=[];
+
+  // 採卵回数ごとの累積成功率（中央値・25/75%ile）をブートストラップで算出
+  // 簡易版：各採卵回数のcumSucc分布から直接計算
+  // 累積成功数を各試行ベースで持ち、パーセンタイル帯を算出
+  let iAcc=0, pAcc=0;
+  for(let k=1;k<=MAX_RET;k++){
+    labels.push(k+'回');
+    iAcc+=insD.cumSucc[k];
+    pAcc+=pgtaD.cumSucc[k];
+    const iRate=iAcc/N*100;
+    const pRate=pAcc/N*100;
+    insCum.push(Math.round(iRate*10)/10);
+    pgtaCum.push(Math.round(pRate*10)/10);
+
+    // 二項分布の95%CI（Wilson score interval）
+    const wilsonCI=(s,n)=>{
+      const p=s/n, z=1.645; // 90%CI（片側5%）
+      const denom=1+z*z/n;
+      const center=(p+z*z/(2*n))/denom;
+      const half=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/denom;
+      return [Math.max(0,(center-half)*100), Math.min(100,(center+half)*100)];
+    };
+    const [iLo,iHi]=wilsonCI(iAcc,N);
+    const [pLo,pHi]=wilsonCI(pAcc,N);
+    insLo.push(Math.round(iLo*10)/10);
+    insHi.push(Math.round(iHi*10)/10);
+    pgtaLo.push(Math.round(pLo*10)/10);
+    pgtaHi.push(Math.round(pHi*10)/10);
+  }
+
+  if(chartInst) chartInst.destroy();
+  const ctx=document.getElementById('cumChart').getContext('2d');
+  chartInst=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[
+      // 保険CI帯（塗り）
+      {label:'保険CI上',data:insHi,borderColor:'transparent',backgroundColor:'rgba(29,158,117,0.12)',fill:'+1',pointRadius:0,tension:0.3},
+      {label:'保険CI下',data:insLo,borderColor:'transparent',backgroundColor:'rgba(29,158,117,0.12)',fill:false,pointRadius:0,tension:0.3},
+      // 保険中央値
+      {label:'保険（PGT-Aなし）',data:insCum,borderColor:'#1D9E75',backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:'#1D9E75',borderWidth:2.5},
+      // PGT-A CI帯
+      {label:'PGT-A CI上',data:pgtaHi,borderColor:'transparent',backgroundColor:'rgba(24,95,165,0.12)',fill:'+1',pointRadius:0,tension:0.3},
+      {label:'PGT-A CI下',data:pgtaLo,borderColor:'transparent',backgroundColor:'rgba(24,95,165,0.12)',fill:false,pointRadius:0,tension:0.3},
+      // PGT-A中央値
+      {label:'全額自費（PGT-Aあり）',data:pgtaCum,borderColor:'#185FA5',backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:'#185FA5',borderWidth:2.5},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          filter:item=>item.dataset.label.indexOf('CI')===-1,
+          callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(1)}%`}
+        }
+      },
+      scales:{
+        x:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:11}}},
+        y:{min:0,max:100,
+           grid:{color:'rgba(128,128,128,0.1)'},
+           ticks:{font:{size:11},callback:v=>v+'%'},
+           title:{display:true,text:'累積成功率（継続前提）',font:{size:11}}}
+      }
+    }
+  });
+}
+
+function renderResults(insD,pgtaD,N){
+  const ip=(insD.successes/N*100).toFixed(1);
+  const pp=(pgtaD.successes/N*100).toFixed(1);
+  document.getElementById('ins_suc_rate').textContent=ip+'%';
+  document.getElementById('pgta_suc_rate').textContent=pp+'%';
+  document.getElementById('ins_suc_n').textContent=
+    `${insD.successes.toLocaleString()}件 / ${N.toLocaleString()}試行`;
+  document.getElementById('pgta_suc_n').textContent=
+    `${pgtaD.successes.toLocaleString()}件 / ${N.toLocaleString()}試行`;
+
+  makeCards('ins_med_cards',insD,50);
+  makeCards('pgta_med_cards',pgtaD,50);
+  makeCards('ins_p90_cards',insD,90);
+  makeCards('pgta_p90_cards',pgtaD,90);
+  makeTable('med_table',insD,pgtaD,50);
+  makeTable('p90_table',insD,pgtaD,90);
+  drawCumChart(insD,pgtaD,N);
+  document.getElementById('results').style.display='block';
+}
+</script>
